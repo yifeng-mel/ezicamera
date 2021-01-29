@@ -3,7 +3,8 @@ Do you want to make your Raspberry Pi a security camera?  This is the right plac
 
 ## Preparation
 Following list is what you need to prepare before running the app:
-1. Camera is installed and enabled on your Raspberry Pi.
+1. Raspberry Pi OS is the operating system.
+2. Camera is installed and enabled on your Raspberry Pi.
 2. Your Raspberry Pi has Internet access.
 3. Docker is installed on your Raspberry Pi.
 
