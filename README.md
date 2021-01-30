@@ -34,6 +34,7 @@ exit
 ```
 TODO:
 ```
+php artisan setCameraUid {camera uid}
 cd ~/ezicamera/Start/rsa_keys && ssh-keygen -f ./camera_id_rsa
 ```
 ## Run
