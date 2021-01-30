@@ -26,6 +26,7 @@ sudo docker run \
     -v videos_vol:/videos \
     -v log_vol:/log \
     -v database_vol:/database \
+    -v rsa_vol: /rsa_keys \
     smartvision/app:start
     
 (inside the docker container)
@@ -49,6 +50,7 @@ sudo docker run \
     -v videos_vol:/videos \
     -v database_vol:/database \
     -v log_vol:/log \
+    -v rsa_vol: /rsa_keys \
     smartvision/app:start \
     smartvision.mel@gmail.com \
     cam1.ezicamera.com \
@@ -67,6 +69,7 @@ sudo docker run \
     -v videos_vol:/videos \
     -v log_vol:/log \
     -v database_vol:/database \
+    -v rsa_vol: /rsa_keys \
     smartvision/app:start
 
 (Inside the docker container)
