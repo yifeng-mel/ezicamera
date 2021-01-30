@@ -29,13 +29,13 @@ sudo docker run \
     smartvision/app:start
     
 (inside the docker container)
-cd /web && php artisan create:user {Your Email} {Your Password}
+cd /web && \
+    php artisan create:user {Your Email} {Your Password} && \
+    php artisan setCameraUid {camera uid} && \
+    cd /rsa_keys && \
+    ssh-keygen -f ./camera_id_rsa
+
 exit
-```
-TODO:
-```
-php artisan setCameraUid {camera uid}
-cd ~/ezicamera/Start/rsa_keys && ssh-keygen -f ./camera_id_rsa
 ```
 ## Run
 Enter the following command to run the app:
