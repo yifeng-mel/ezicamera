@@ -32,7 +32,10 @@ sudo docker run \
 cd /web && php artisan create:user {Your Email} {Your Password}
 exit
 ```
-
+TODO:
+```
+cd ~/ezicamera/Start/rsa_keys && ssh-keygen -f ./camera_id_rsa
+```
 ## Run
 Enter the following command to run the app:
 ```bash
