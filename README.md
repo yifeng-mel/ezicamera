@@ -2,10 +2,11 @@
 Do you want to make your Raspberry Pi a security camera?  This is the right place.
 
 ## Preparation
-Following list is what you need to prepare before running the app:
-1. Camera is installed and enabled on your Raspberry Pi.
-2. Your Raspberry Pi has Internet access.
-3. Docker is installed on your Raspberry Pi.
+Following list is what you need to prepare before running the app: 
+1. Raspberry Pi OS is the operating system. (https://www.raspberrypi.org/documentation/installation/installing-images/)
+2. Camera is installed and enabled on your Raspberry Pi. (https://www.raspberrypi.org/documentation/configuration/camera.md)
+2. Your Raspberry Pi has Internet access. (https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
+3. Docker is installed on your Raspberry Pi. (https://phoenixnap.com/kb/docker-on-raspberry-pi)
 
 ## Run
 Enter the following command to run the app:
