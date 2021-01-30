@@ -28,6 +28,31 @@ sudo docker run \
     {Your Email} \
     {Your Password}
 ```
+To run the docker image in the interactive mode and start the application in the docker container:
+```
+sudo docker run \
+    -it \
+    --entrypoint /bin/bash \
+    --network host \
+    --device /dev/video0 \
+    -v etcletsencrypt_vol:/etc/letsencrypt \
+    -v varlibletsencrypt_vol:/var/lib/letsencrypt \
+    -v apachesitesavailable_vol:/etc/apache2/sites-available \
+    -v videos_vol:/videos \
+    -v log_vol:/log \
+    -v database_vol:/database \
+    smartvision/app:start
+
+(Inside the docker container)
+nohup bash /start.bash \
+    smartvision.mel@gmail.com \
+    cam1.ezicamera.com \
+    {ID}.cam1.ezicamera.com \
+    k8LE0iCXAseXVk7d \
+    {Your Email} \
+    {Your Password} \
+    &
+```
 
 ## Manually build the docker image
 1. Build image for WebRTC, in this step we will install WebRTC libraries, python3 pip, python3 websockets.
