@@ -40,7 +40,6 @@ enum AppState {
 
 static GMainLoop *loop;
 static GstElement *pipe1, *webrtc1;
-static GObject *send_channel, *receive_channel;
 
 static SoupWebsocketConnection *ws_conn = NULL;
 static enum AppState app_state = 0;
@@ -281,54 +280,6 @@ on_negotiation_needed (GstElement * element, gpointer user_data)
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
 #define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload="
 
-static void
-data_channel_on_error (GObject * dc, gpointer user_data)
-{
-  cleanup_and_quit_loop ("Data channel error", 0);
-}
-
-static void
-data_channel_on_open (GObject * dc, gpointer user_data)
-{
-  GBytes *bytes = g_bytes_new ("data", strlen("data"));
-  g_print ("data channel opened\n");
-  g_signal_emit_by_name (dc, "send-string", "Hi! from GStreamer");
-  g_signal_emit_by_name (dc, "send-data", bytes);
-  g_bytes_unref (bytes);
-}
-
-static void
-data_channel_on_close (GObject * dc, gpointer user_data)
-{
-  cleanup_and_quit_loop ("Data channel closed", 0);
-}
-
-static void
-data_channel_on_message_string (GObject * dc, gchar *str, gpointer user_data)
-{
-  g_print ("Received data channel message: %s\n", str);
-}
-
-static void
-connect_data_channel_signals (GObject * data_channel)
-{
-  g_signal_connect (data_channel, "on-error", G_CALLBACK (data_channel_on_error),
-      NULL);
-  g_signal_connect (data_channel, "on-open", G_CALLBACK (data_channel_on_open),
-      NULL);
-  g_signal_connect (data_channel, "on-close", G_CALLBACK (data_channel_on_close),
-      NULL);
-  g_signal_connect (data_channel, "on-message-string", G_CALLBACK (data_channel_on_message_string),
-      NULL);
-}
-
-static void
-on_data_channel (GstElement * webrtc, GObject * data_channel, gpointer user_data)
-{
-  connect_data_channel_signals (data_channel);
-  receive_channel = data_channel;
-}
-
 static gboolean
 start_pipeline (void)
 {
@@ -348,11 +299,17 @@ start_pipeline (void)
   //     "v4l2src ! video/x-raw, width=300, height=300, framerate=15/1 ! videoconvert ! queue ! x264enc ! rtph264pay ! "
   //     "queue ! " RTP_CAPS_H264 "96 ! sendonly. ",
   //     &error);
+  gchar *my_string = g_strdup_printf("%lli", g_get_real_time());
 
   pipe1 =
-      gst_parse_launch ("webrtcbin bundle-policy=max-bundle name=sendonly " STUN_SERVER
-      "v4l2src device=/dev/video0 ! video/x-raw, width=400, height=400, framerate=15/1 ! videoconvert ! queue ! vp8enc deadline=1 ! tee name=t ! queue ! avimux ! filesink location=/videos/`date '+%%Y-%%m-%%d-%%H-%%M-%%S'`-%%02d.avi t. ! queue ! rtpvp8pay ! "
-      "queue ! " RTP_CAPS_VP8 "96 ! sendonly. ",
+      gst_parse_launch (
+        g_strconcat(
+          "webrtcbin bundle-policy=max-bundle name=sendonly " STUN_SERVER 
+          "v4l2src device=/dev/video0 ! video/x-raw, width=640, height=480, framerate=15/1 ! clockoverlay time-format=\"%D %H:%M:%S\" ! videoconvert ! queue ! vp8enc deadline=1 ! tee name=t ! queue ! avimux ! filesink location=/videos/", 
+          my_string,
+          ".avi t. ! queue ! rtpvp8pay ! queue ! " RTP_CAPS_VP8 "96 ! sendonly. ",
+          NULL
+        ),
       &error);
 
   if (error) {
@@ -376,17 +333,6 @@ start_pipeline (void)
 
   gst_element_set_state (pipe1, GST_STATE_READY);
 
-  g_signal_emit_by_name (webrtc1, "create-data-channel", "channel", NULL,
-      &send_channel);
-  if (send_channel) {
-    g_print ("Created data channel\n");
-    connect_data_channel_signals (send_channel);
-  } else {
-    g_print ("Could not create data channel, is usrsctp available?\n");
-  }
-
-  g_signal_connect (webrtc1, "on-data-channel", G_CALLBACK (on_data_channel),
-      NULL);
   /* Incoming streams will be exposed via this signal */
   g_signal_connect (webrtc1, "pad-added", G_CALLBACK (on_incoming_stream),
       pipe1);

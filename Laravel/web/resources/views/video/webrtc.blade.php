@@ -15,6 +15,31 @@
     let receiveBuffer = [];
     let receivedSize = 0;
 
+    function displayProgressBar() {
+        $('#progress-bar-div').css('display', 'block');
+    }
+
+    function setProgressBarTime(value) {
+        $('#progress-bar').css('transition', value);
+    }
+
+    function setProgressBarText(text) {
+        $('#progress-bar-text').html(text);
+    }
+
+    function setProgressBarWidth(width) {
+        $('#progress-bar').width(width);
+    }   
+
+    function removeProgressBarDiv() {
+        $('#progress-bar-div').remove();
+    }
+
+    function updateProgressBar(text, width) {
+        setProgressBarText(text)
+        setProgressBarWidth(width)
+    }
+
     function generateRandomString(length) {
         var result           = '';
         var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -30,10 +55,7 @@
     }
 
     function postToken() {
-        $.post('/api/videos/token', {token: global_peer_id, file_name: file_name, _token: $('meta[name=csrf-token]').attr('content')}, function(response){
-            let data = JSON.parse(response)
-            file_size = data.file_size
-        })
+        $.post('/api/videos/token', {token: global_peer_id, file_name: file_name, _token: $('meta[name=csrf-token]').attr('content')})
     }
 
     function getOurId() {
@@ -117,7 +139,10 @@
         console.log("Received " + event.data);
         switch (event.data) {
             case "HELLO": // STEP 1 open WebSocket
+                connect_attempts = 0
                 setStatus("Registered with server, waiting for call");
+                setProgressBarTime('width 10s ease')
+                updateProgressBar('Connecting to camera storage ...', '50%')
                 postToken();
                 return;
             default:
@@ -174,7 +199,7 @@
         file_name = fileName
         file_size = fileSize
         console.log(file_name, file_size)
-        return;
+        updateProgressBar('Establishing secure connection ...', '10%')
         connect_attempts++;
         if (connect_attempts > 3) {
             setError("Too many connection attempts, aborting. Refresh page to try again");
@@ -211,6 +236,8 @@
     }
 
     const handleDataChannelOpen = (event) =>{
+        setProgressBarTime('width 1s ease')
+        updateProgressBar('Start downloading ...', '60%')
         console.log("dataChannel.OnOpen", event);
     };
 
@@ -226,15 +253,31 @@
             receiveBuffer.push(event.data);
             receivedSize += event.data.byteLength;
             console.log('RECEIVED SIZE', receivedSize)
+            downloadedPercentage = Math.floor( ( receivedSize / parseInt(file_size) ) * 100 )
+            setProgressBarTime('none')
+            updateProgressBar('Downloaded ' + downloadedPercentage + '% ...', ( 60 + 40*(downloadedPercentage / 100) ) + '%')
+
             if (receivedSize === parseInt(file_size)) {
-                const received = new Blob(receiveBuffer);
-                receiveBuffer = [];
+                let received = new Blob(receiveBuffer);                
 
                 // STEP 4 file downloaded
                 document.querySelector('a#save-file-btn').href = URL.createObjectURL(received);
                 document.querySelector('a#save-file-btn').download = file_name;
                 $('.downloading').addClass('d-none');
                 $('.downloaded').removeClass('d-none');
+
+                receiveBuffer = [];
+                receivedSize = 0;
+                
+                if (peer_connection) {
+                    peer_connection.close();
+                    peer_connection = null;
+                }
+
+                if (ws_conn) {
+                    ws_conn.close();
+                    ws_conn = null;
+                }                
             }
         }
         send_channel.send("Hi! (from browser)");

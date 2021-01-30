@@ -74,7 +74,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </div>
         </form>
       <p class="mb-1">
-        <a href="#">I forgot my password</a>
+        <a href="/forgot-password">I forgot my password</a>
       </p>
     </div>
     <!-- /.login-card-body -->

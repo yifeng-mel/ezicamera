@@ -10,7 +10,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <!-- CSRF Token -->
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  
+  @yield('meta')
   <title>AdminLTE 3 | Top Navigation</title>
 
   <!-- Font Awesome Icons -->

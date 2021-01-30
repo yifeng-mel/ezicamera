@@ -27,6 +27,7 @@ class VideoController extends Controller
         $previous_page = null;
         $next_page = $no_of_files > 8 ? 2 : null;
         $total_pages = floor($no_of_files / 8) + 1;
+        $total_pages = ($total_pages > 1 && ($no_of_files % 8 ==0 )) ? ($total_pages - 1) : $total_pages;
 
         return view('video.index', [
             'files_arr'     => $files_arr, 
@@ -49,6 +50,7 @@ class VideoController extends Controller
         $end_entry = $page * 8 > $no_of_files ? $no_of_files : $page * 8;
         $previous_page = $page > 1 ? ($page -1) : null;
         $total_pages = floor($no_of_files / 8) + 1;
+        $total_pages = ($total_pages > 1 && ($no_of_files % 8 ==0 )) ? ($total_pages - 1) : $total_pages;
         $next_page = ( $page == $total_pages) ? null : $page + 1;
 
         return json_encode([
@@ -65,9 +67,11 @@ class VideoController extends Controller
 
     public function token()
     {
+        $host = request()->getHost();
+        $ws_server = "wss://" . $host . "/wss/";        
         $token = request()->get('token');
         $file_name = request()->get('file_name');
-        $command = "sudo bash /app/device/instructions/start_downloading " . $token . " " . $file_names_str;
+        $command = "sudo /bin/bash /scripts/start_downloading.bash " . $token . " " . $file_name . " " . $ws_server . " &>> /log/webrtc-sendrecv.txt";
         shell_exec($command);
     }
 
@@ -88,21 +92,37 @@ class VideoController extends Controller
             return ['filename'=>$line_arr[8] ?? '', 'size'=>$line_arr[4] ?? '', 'date'=>$line_arr[5] ?? '', 'time'=>substr($line_arr[6] ?? '', 0, 8)];
         },$all_files_line_arr);
 
+        $data_arr           = array_filter($data_arr, function($each){
+            return !empty($each['filename']) && !empty($each['size']) && !empty($each['date']) && !empty($each['time']);
+        });
+
         $file_names_str     = array_reduce($data_arr, function($carry, $data){
             return $carry . ' ' . '/videos/' . $data['filename'];
         }, '');
-
-        $duration_arr       = explode("\n", trim(shell_exec('mediainfo --Inform="Video;%Duration/String%\n"' . $file_names_str)));
         
-        $byte_size_arr      = explode("\n", trim(shell_exec('ls -al' . $file_names_str)));
+        $byte_size_arr      = explode("\n", trim(shell_exec('ls -alt' . $file_names_str)));
 
-        $files_arr          = array_map(function($data, $duration, $byte_size_line){
+        $files_arr          = array_map(function($data, $byte_size_line) use($data_arr) {
             $byte_size_line_arr = preg_split('/\s+/', $byte_size_line, -1, PREG_SPLIT_NO_EMPTY);
             $file = $data;
-            $file['duration'] = $duration;
+            $file['start_time'] = strpos($file['filename'], '-') !== false ? str_replace('-', ':', substr($file['filename'], 11, 8)) : date('H:i:s', substr($file['filename'], 0, -10));
             $file['byte_size'] = $byte_size_line_arr[4] ?? 0;
+            if (strpos($file['filename'], '-') !== false) {
+                $filename_index = substr($file['filename'], 20, -4);
+                if ($filename_index != '00') {
+                    $prev_filename_index = intval($filename_index) - 1;
+                    $prev_filename_index_str = sprintf("%02d", $prev_filename_index);
+                    $prev_filename = substr($file['filename'], 0, 20) . $prev_filename_index_str . '.avi';
+                    $prev_file_data = current(array_filter($data_arr, function($e) use($prev_filename) { 
+                        return $e['filename'] == $prev_filename;
+                    }));
+                    if ($prev_file_data) {
+                        $file['start_time'] = $prev_file_data['time'];
+                    }
+                }
+            }
             return $file;
-        }, $data_arr, $duration_arr, $byte_size_arr);  
+        }, $data_arr, $byte_size_arr);  
 
         return [$no_of_files, $files_arr];
     }

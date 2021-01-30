@@ -3,11 +3,11 @@
 # set up this env variable so C runtime can find the related library like opus, ..., webrtc, etc.
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib
 
-# create cusomter user account
-cd /web && php artisan create:user $5 $6
-
 chmod +x /pagekite.py
 chmod +x /simple-server.py
+
+# start cron
+service cron restart
 
 # start apache for opening port 80
 service apache2 start 
@@ -19,6 +19,11 @@ service apache2 start
 # certbot --apache --non-interactive --agree-tos -m $1 -d $3
 privateKeyHome="/etc/letsencrypt/live/$3"
 privateKeyFile="$privateKeyHome/privkey.pem"
+logFile="/log/webrtc-sendrecv.txt"
+
+if [ ! -f $logFile ]; then 
+    touch /log/webrtc-sendrecv.txt
+fi 
 
 echo "Checking if certificate [$privateKeyFile] exist )."
 if [ ! -f $privateKeyFile ]; then

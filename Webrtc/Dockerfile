@@ -19,6 +19,7 @@ RUN apt-get install -y --no-install-recommends \
     libglib2.0 \
     libnice-dev \
     libopus-dev \
+    libpango1.0-dev \
     libpcre3-dev \
     libsrtp2-dev \
     libusrsctp-dev \
@@ -57,6 +58,8 @@ RUN cd / \
 RUN cd / \
     && git clone https://github.com/libnice/libnice.git \
     && cd libnice \
+    && git fetch origin latest-release \
+    && git checkout latest-release \
     && ./autogen.sh --enable-compile-warnings=no --prefix=/usr --with-gstreamer --enable-static --enable-static-plugins --enable-shared --without-gstreamer-0.10 --disable-gtk-doc \
     && make install
 

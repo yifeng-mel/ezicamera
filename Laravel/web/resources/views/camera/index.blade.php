@@ -1,5 +1,9 @@
 @extends('layouts.app-v1')
 
+@section('meta')
+<meta http-equiv="refresh" content="1800" >
+@endsection
+
 @section('content')
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
@@ -25,7 +29,14 @@
     <div class="content">
       <div class="container">
         <div class="row justify-content-center">
-            <video id="stream" autoplay playsinline width="400" height="400" style="max-width:100%;background-color:black">
+            <div id="progress-bar-div" class="card-body" style="position:absolute;width:400px;top:170px;z-index:1;display:none" >
+              <div id="progress-bar-text" style="position:absolute;color:white;top:0"></div>
+              <div class="progress progress-xxs mt-1">
+                <div id="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" class="progress-bar progress-bar-danger progress-bar-striped" style="width:0%; transition:width 3s ease">
+                </div>
+              </div>
+            </div>
+            <video id="stream" muted controls autoplay playsinline width="640" height="480" style="max-width:100%;background-color:black">
             Your browser doesn't support video
             </video>
         </div>

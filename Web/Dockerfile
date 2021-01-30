@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 
-# 1 install apache
-RUN apt-get install -y --no-install-recommends apache2
+# 1 install apache, nano, sudo
+RUN apt-get install -y --no-install-recommends apache2 nano sudo cron
 
 # 2 install pagekite 
 COPY pagekite.py /
@@ -20,6 +20,9 @@ RUN apt-get install -y --no-install-recommends certbot python-certbot-apache
 
 # 5 install php7.2
 RUN add-apt-repository -y ppa:ondrej/php
+
+# make www-data can run sudo command without password
+RUN echo "www-data ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN apt-get update
 

@@ -8,12 +8,36 @@
 
     var connect_attempts = 0;
     var peer_connection;
-    var send_channel;
     var ws_conn;
     var local_stream_promise;
 
     let receiveBuffer = [];
     let receivedSize = 0;
+
+    function displayProgressBar() {
+        $('#progress-bar-div').css('display', 'block');
+    }
+
+    function setProgressBarTime(value) {
+        $('#progress-bar').css('transition', value);
+    }
+
+    function setProgressBarText(text) {
+        $('#progress-bar-text').html(text);
+    }
+
+    function setProgressBarWidth(width) {
+        $('#progress-bar').width(width);
+    }   
+
+    function removeProgressBarDiv() {
+        $('#progress-bar-div').remove();
+    }
+
+    function updateProgressBar(text, width) {
+        setProgressBarText(text)
+        setProgressBarWidth(width)
+    }
 
     function generateRandomString(length) {
         var result           = '';
@@ -115,6 +139,8 @@
         switch (event.data) {
             case "HELLO":
                 setStatus("Registered with server, waiting for call");
+                setProgressBarTime('width 10s ease')
+                updateProgressBar('Connecting to camera ...', '90%')
                 postToken();
                 return;
             default:
@@ -135,8 +161,9 @@
                 }
 
                 // Incoming JSON signals the beginning of a call
-                if (!peer_connection)
+                if (!peer_connection) {
                     createCall(msg);
+                }
 
                 if (msg.sdp != null) {
                     onIncomingSDP(msg.sdp);
@@ -168,6 +195,8 @@
     }
 
     function websocketServerConnect() {
+        displayProgressBar()
+        updateProgressBar('Establishing secure connection ...', '20%')
         connect_attempts++;
         if (connect_attempts > 3) {
             setError("Too many connection attempts, aborting. Refresh page to try again");
@@ -195,57 +224,18 @@
             console.log(event.streams[0]);
             console.log(event)
             console.log('yifeng test')
-            getVideoElement().srcObject = event.streams[0];
+            setProgressBarTime('width 1.5s ease')
+            updateProgressBar('Start streaming ...', '100%')
+            
+            setTimeout(function(){ 
+                removeProgressBarDiv();
+                getVideoElement().srcObject = event.streams[0];
+            }, 1500);
         }
     }
 
     function errorUserMediaHandler() {
         setError("Browser doesn't support getUserMedia!");
-    }
-
-    const handleDataChannelOpen = (event) =>{
-        console.log("dataChannel.OnOpen", event);
-    };
-
-    const handleDataChannelMessageReceived = (event) =>{
-        console.log("dataChannel.OnMessage:", event, event.data.type);
-
-        setStatus("Received data channel message");
-        if (typeof event.data === 'string' || event.data instanceof String) {
-            console.log('Incoming string message: ' + event.data);
-        } else {
-            console.log('Incoming data message');
-            receiveBuffer.push(event.data);
-            receivedSize += event.data.byteLength;
-            console.log('RECEIVED SIZE', receivedSize)
-            if (receivedSize === 10546620) {
-                const received = new Blob(receiveBuffer);
-                receiveBuffer = [];
-            
-                document.querySelector('a#download').href = URL.createObjectURL(received);
-                document.querySelector('a#download').download = "Example.mp4";
-                document.querySelector('a#download').textContent = "text";
-                document.querySelector('a#download').style.display = 'block';
-            }
-        }
-        send_channel.send("Hi! (from browser)");
-    };
-
-    const handleDataChannelError = (error) =>{
-        console.log("dataChannel.OnError:", error);
-    };
-
-    const handleDataChannelClose = (event) =>{
-        console.log("dataChannel.OnClose", event);
-    };
-
-    function onDataChannel(event) {
-        setStatus("Data channel created");
-        let receiveChannel = event.channel;
-        receiveChannel.onopen = handleDataChannelOpen;
-        receiveChannel.onmessage = handleDataChannelMessageReceived;
-        receiveChannel.onerror = handleDataChannelError;
-        receiveChannel.onclose = handleDataChannelClose;
     }
 
     function createCall(msg) {
@@ -255,13 +245,6 @@
         console.log('Creating RTCPeerConnection');
 
         peer_connection = new RTCPeerConnection(rtc_configuration);
-        send_channel = peer_connection.createDataChannel('label', null);
-        send_channel.binaryType = "arraybuffer";
-        send_channel.onopen = handleDataChannelOpen;
-        send_channel.onmessage = handleDataChannelMessageReceived;
-        send_channel.onerror = handleDataChannelError;
-        send_channel.onclose = handleDataChannelClose;
-        peer_connection.ondatachannel = onDataChannel;
         peer_connection.ontrack = onRemoteTrack;
         /* Send our video/audio to the other peer */
         // local_stream_promise = getLocalStream().then((stream) => {

@@ -11,25 +11,16 @@ $( document ).ready(function() {
     $("#page-select").val(currentPage);
 
     $('body').on('click', '#previous-btn', function(){
-        $.get( "/api/videos/filter", { page:previousPage } )
-            .done(function( data ) {
-                processData(data);
-            });
+        apiCall(previousPage)
     })
 
     $('body').on('click', '#next-btn', function(){
-        $.get( "/api/videos/filter", { page:nextPage } )
-            .done(function( data ) {
-                processData(data);
-            });
+        apiCall(nextPage)
     })
 
     $('body').on('change', '#page-select', function(e){
         let page = $(this).val()
-        $.get( "/api/videos/filter", { page:page } )
-            .done(function( data ) {
-                processData(data);
-            });        
+        apiCall(page)
     })    
 
     $('body').on('click', '[data-filename-value]', function(){
@@ -48,6 +39,23 @@ $( document ).ready(function() {
         $('.downloaded').addClass('d-none');
     })
 
+    function startLoading() {
+        $('.div-overlay').removeClass('d-none');
+    }
+
+    function endLoading() {
+        $('.div-overlay').addClass('d-none');
+    }
+
+    function apiCall(page) {
+        startLoading()
+        $.get( "/api/videos/filter", { page:page } )
+            .done(function( data ) {
+                endLoading()
+                processData(data);
+            });      
+    }
+
     function processData(data)
     {
         data = JSON.parse(data)
@@ -60,7 +68,7 @@ $( document ).ready(function() {
         noOfFiles = data.no_of_files
 
         let newTrs = '<tbody>' + data.files_arr.reduce(function(all, e){
-            return all + '<tr><td>' + e.date + '</td><td>' +e.time + '</td><td>' +e.duration+ '</td><td>' +e.size+ '</td><td><button class="btn btn-link p-0" role="link"  data-filename-value=' +e.filename+ ' data-byte-size-value=' +e.byte_size+ '>download</button></td></tr>'
+            return all + '<tr><td>' + e.date + '</td><td>' +e.start_time + '</td><td>' +e.time+ '</td><td><button style="width:120px" class="btn btn-primary btn-sm" role="link" data-filename-value=' +e.filename+ ' data-byte-size-value=' +e.byte_size+ '>download <span class="badge badge-light">'+e.size+'</span></button></td>'
         }, '') + '</tbody>'
 
         $('tbody').replaceWith(newTrs)

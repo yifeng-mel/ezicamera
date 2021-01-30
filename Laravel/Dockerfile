@@ -14,7 +14,7 @@ RUN cd /web && composer install
 
 RUN cd / && mkdir database && chmod -R 777 /database
 
-RUN cd /database && touch database.sqlite && chmod 777 database.sqlite
+RUN cd /database && rm -f database.sqlite && touch database.sqlite && chmod 777 database.sqlite
 
 RUN cd /web && php artisan migrate && php artisan key:generate
 
