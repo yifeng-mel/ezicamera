@@ -8,6 +8,30 @@ Following list is what you need to prepare before running the app:
 2. Your Raspberry Pi has Internet access. (https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
 3. Docker is installed on your Raspberry Pi. (https://phoenixnap.com/kb/docker-on-raspberry-pi)
 
+## Pull Docker Image
+Pull the docker image:
+```
+sudo docker pull smartvision/app:start
+```
+Create user:
+```
+sudo docker run \
+    -it \
+    --entrypoint /bin/bash \
+    --network host \
+    --device /dev/video0 \
+    -v etcletsencrypt_vol:/etc/letsencrypt \
+    -v varlibletsencrypt_vol:/var/lib/letsencrypt \
+    -v apachesitesavailable_vol:/etc/apache2/sites-available \
+    -v videos_vol:/videos \
+    -v log_vol:/log \
+    -v database_vol:/database \
+    smartvision/app:start
+    
+(inside the docker container)
+cd /web && php artisan create:user {Your Email} {Your Password}
+```
+
 ## Run
 Enter the following command to run the app:
 ```bash
@@ -23,10 +47,7 @@ sudo docker run \
     smartvision/app:start \
     smartvision.mel@gmail.com \
     cam1.ezicamera.com \
-    {ID}.cam1.ezicamera.com \
-    k8LE0iCXAseXVk7d \
-    {Your Email} \
-    {Your Password}
+    {ID}.cam1.ezicamera.com
 ```
 To run the docker image in the interactive mode and start the application in the docker container:
 ```
@@ -49,8 +70,6 @@ nohup bash /start.bash \
     cam1.ezicamera.com \
     {ID}.cam1.ezicamera.com \
     k8LE0iCXAseXVk7d \
-    {Your Email} \
-    {Your Password} \
     &
 ```
 
