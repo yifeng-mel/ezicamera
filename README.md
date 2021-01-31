@@ -43,7 +43,7 @@ sudo docker run \
 (inside the docker container)
 cd /web && \
     php artisan create:user {Your Email} {Your Password} && \
-    php artisan setCameraUid {camera uid}
+    php artisan set:cameraUid {camera uid}
 
 exit
 ```
