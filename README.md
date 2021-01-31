@@ -62,7 +62,8 @@ sudo docker run \
     smartvision/app:start \
     smartvision.mel@gmail.com \
     cam1.ezicamera.com \
-    {ID}.cam1.ezicamera.com
+    {ID}.cam1.ezicamera.com \
+    k8LE0iCXAseXVk7d 
     
 ```
 To run the docker image in the interactive mode and start the application in the docker container:
