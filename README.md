@@ -7,7 +7,7 @@ Following list is what you need to prepare before running the app:
 2. Camera is installed and enabled on your Raspberry Pi. (https://www.raspberrypi.org/documentation/configuration/camera.md)
 3. Your Raspberry Pi has Internet access. (https://www.raspberrypi.org/documentation/configuration/wireless/wireless-cli.md)
 4. Docker is installed on your Raspberry Pi. (https://phoenixnap.com/kb/docker-on-raspberry-pi)
-5. Request a camera uid from cloud camera manager.
+5. Request a camera uid from cloud camera manager. (If you are not clear about this step, please contact Yifeng at yifeng.zhu.mel@gmail.com.  He is glad to help :D )
 
 ## Pull the Git Repository
 ```
