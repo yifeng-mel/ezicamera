@@ -89,7 +89,7 @@ nohup bash /start.bash \
     &
 ```
 
-## Manually build the docker image
+## (Optional and Not Recommended) Manually Build All the Docker Images
 1. Build image for WebRTC, in this step we will install WebRTC libraries, python3 pip, python3 websockets.
 ```
 cd ~/ezicamera/Webrtc
