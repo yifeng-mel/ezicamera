@@ -9,12 +9,23 @@ Following list is what you need to prepare before running the app:
 4. Docker is installed on your Raspberry Pi. (https://phoenixnap.com/kb/docker-on-raspberry-pi)
 5. Request a camera uid from cloud camera manager.
 
-## Pull Docker Image
-Pull the docker image:
+## Pull the Git Repository
 ```
-sudo docker pull smartvision/app:start
+cd ~ && git clone https://github.com/yifeng-mel/ezicamera.git
 ```
-Create user:
+
+## Generate RSA Keys 
+```
+cd ~/ezicamera/Start/rsa_keys/ && ssh-keygen -f ./camera_id_rsa
+```
+
+## Build the Docker Image
+```
+cd ~/ezicamera/Start && sudo docker build . -t smartvision/app:start
+```
+
+
+## Create User and Set Camera Uid
 ```
 sudo docker run \
     -it \
@@ -27,21 +38,18 @@ sudo docker run \
     -v videos_vol:/videos \
     -v log_vol:/log \
     -v database_vol:/database \
-    -v rsa_vol:/rsa_keys \
     smartvision/app:start
     
 (inside the docker container)
 cd /web && \
     php artisan create:user {Your Email} {Your Password} && \
-    php artisan setCameraUid {camera uid} && \
-    cd /rsa_keys && \
-    ssh-keygen -f ./camera_id_rsa
+    php artisan setCameraUid {camera uid}
 
 exit
 ```
+
 ## Run
-Enter the following command to run the app:
-```bash
+```
 sudo docker run \
     --network host \
     --device /dev/video0 \
@@ -51,11 +59,11 @@ sudo docker run \
     -v videos_vol:/videos \
     -v database_vol:/database \
     -v log_vol:/log \
-    -v rsa_vol:/rsa_keys \
     smartvision/app:start \
     smartvision.mel@gmail.com \
     cam1.ezicamera.com \
     {ID}.cam1.ezicamera.com
+    
 ```
 To run the docker image in the interactive mode and start the application in the docker container:
 ```
@@ -70,7 +78,6 @@ sudo docker run \
     -v videos_vol:/videos \
     -v log_vol:/log \
     -v database_vol:/database \
-    -v rsa_vol:/rsa_keys \
     smartvision/app:start
 
 (Inside the docker container)
