@@ -24,6 +24,8 @@ cd ~/ezicamera/Start/rsa_keys/ && ssh-keygen -f ./camera_id_rsa
 cd ~/ezicamera/Start && sudo docker build . -t smartvision/app:start
 ```
 
+## Save Camera Public Key to Cloud Portal and Obtain Camera Uid 
+Currently please contact Yifeng (yifeng.zhu.mel@gmail.com) for this step
 
 ## Create User and Set Camera Uid
 ```
